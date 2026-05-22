@@ -4,7 +4,7 @@ routine_id: "trig_01DWCtSrSSCDsvNykrsoMJ1x"
 cron: "0 13 * * 1-5"
 schedule_human: "9am ET Mon–Fri (before market open)"
 enabled: true
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 repo: https://github.com/anthonyrides99-blip/trading_bot
 ---
 

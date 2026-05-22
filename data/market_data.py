@@ -4,6 +4,7 @@ import pandas as pd
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
 from alpaca.data.timeframe import TimeFrame
+from alpaca.data.enums import DataFeed
 
 import config
 from utils.logger import logger
@@ -37,6 +38,7 @@ def get_bars(ticker: str, timeframe: TimeFrame = TimeFrame.Minute, limit: int = 
         start=start,
         end=end,
         limit=limit,
+        feed=DataFeed.IEX,
     )
     bars = _client.get_stock_bars(request)
     df = bars.df
