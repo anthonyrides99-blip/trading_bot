@@ -27,16 +27,12 @@ def get_bars(ticker: str, timeframe: TimeFrame = TimeFrame.Minute, limit: int = 
     end = datetime.now(timezone.utc)
     # Use 90 calendar days for daily bars (covers ~60 trading days for indicators)
     # Use 7 days for intraday bars (enough for 120 minute bars)
-    if timeframe == TimeFrame.Day:
+    if str(timeframe) == str(TimeFrame.Day):
         start = end - timedelta(days=90)
     else:
         start = end - timedelta(days=7)
 
-    # IEX feed only applies to intraday real-time data.
-    # Daily bars use Alpaca's historical provider which works on free accounts without a feed param.
-    kwargs = dict(symbol_or_symbols=ticker, timeframe=timeframe, start=start, end=end, limit=limit)
-    if timeframe != TimeFrame.Day:
-        kwargs["feed"] = DataFeed.IEX
+    kwargs = dict(symbol_or_symbols=ticker, timeframe=timeframe, start=start, end=end, limit=limit, feed=DataFeed.IEX)
 
     request = StockBarsRequest(**kwargs)
     bars = _client.get_stock_bars(request)
@@ -65,7 +61,7 @@ def get_news_headlines(ticker: str, limit: int = 5) -> list[str]:
         end = datetime.now(timezone.utc)
         start = end - timedelta(days=2)
         request = NewsRequest(
-            symbols=[ticker],
+            symbols=ticker,
             start=start,
             end=end,
             limit=limit,
