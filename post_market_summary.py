@@ -70,6 +70,7 @@ def main() -> None:
         logger.info(f"  {o.side.upper()} {qty:.0f}x {o.symbol} @ ${price:.2f}")
 
     # Portfolio history for today's P&L
+    pnl_summary = "P&L unavailable"
     try:
         hist_req = GetPortfolioHistoryRequest(period="1D", timeframe="1H")
         history = _trading_client.get_portfolio_history(hist_req)
@@ -79,7 +80,8 @@ def main() -> None:
             pnl = close_eq - open_eq
             pnl_pct = (pnl / open_eq * 100) if open_eq else 0
             sign = "+" if pnl >= 0 else ""
-            logger.info(f"Today's P&L: {sign}${pnl:,.2f} ({sign}{pnl_pct:.2f}%)")
+            pnl_summary = f"Today's P&L: {sign}${pnl:,.2f} ({sign}{pnl_pct:.2f}%)"
+            logger.info(pnl_summary)
         else:
             logger.info("P&L: portfolio history unavailable")
     except Exception as exc:
@@ -114,11 +116,7 @@ def main() -> None:
     except Exception:
         overnight_detail = "Could not fetch."
 
-    sign = "+" if week_pnl >= 0 else ""  # reuse from above scope if available
-    try:
-        pnl_line = pnl_summary  # defined in portfolio history block above
-    except NameError:
-        pnl_line = "P&L unavailable"
+    pnl_line = pnl_summary
 
     create_task(
         config.CLICKUP_API_TOKEN,
