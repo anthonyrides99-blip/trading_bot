@@ -68,7 +68,14 @@ def get_news_headlines(ticker: str, limit: int = 5) -> list[str]:
         )
         news = _news_client.get_news(request)
         articles = getattr(news, "news", news)
-        return [a.headline for a in articles]
+        headlines = []
+        for item in articles:
+            # alpaca-py may yield (symbol, article) tuples or bare article objects
+            article = item[-1] if isinstance(item, tuple) else item
+            h = getattr(article, "headline", None)
+            if h:
+                headlines.append(h)
+        return headlines[:limit]
     except Exception as exc:
         logger.warning(f"{ticker}: failed to fetch news — {exc}")
         return []
