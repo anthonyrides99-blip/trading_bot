@@ -26,11 +26,12 @@ CLICKUP_LIST_DAILY=${CLICKUP_LIST_DAILY}
 CLICKUP_LIST_WEEKLY=${CLICKUP_LIST_WEEKLY}
 CLICKUP_LIST_PREMARKET=${CLICKUP_LIST_PREMARKET}
 
-2. Install dependencies:
-pip install -r requirements.txt -q
+2. Create a venv and install dependencies:
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt -q
 
 3. Run the pre-market scan:
-python pre_market_scan.py
+.venv/bin/python pre_market_scan.py
 
 4. Report: the score (strong_buy / watch / avoid) and one-line reason for each ticker, and a summary of today's game plan.
 

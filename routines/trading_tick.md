@@ -26,10 +26,11 @@ CLICKUP_LIST_DAILY=${CLICKUP_LIST_DAILY}
 CLICKUP_LIST_WEEKLY=${CLICKUP_LIST_WEEKLY}
 CLICKUP_LIST_PREMARKET=${CLICKUP_LIST_PREMARKET}
 
-2. Install dependencies:
-pip install -r requirements.txt -q
+2. Create a venv and install dependencies:
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt -q
 
 3. Run the trading bot single-tick:
-python run_once.py
+.venv/bin/python run_once.py
 
 4. Report: what time it ran, whether the market was open, what decision Claude made for each ticker (buy/sell/hold + confidence), and any orders placed on the Alpaca paper account.

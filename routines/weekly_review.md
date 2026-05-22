@@ -26,11 +26,12 @@ CLICKUP_LIST_DAILY=${CLICKUP_LIST_DAILY}
 CLICKUP_LIST_WEEKLY=${CLICKUP_LIST_WEEKLY}
 CLICKUP_LIST_PREMARKET=${CLICKUP_LIST_PREMARKET}
 
-2. Install dependencies:
-pip install -r requirements.txt -q
+2. Create a venv and install dependencies:
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt -q
 
 3. Run the weekly review:
-python weekly_review.py
+.venv/bin/python weekly_review.py
 
 4. Report: weekly P&L, number of winning vs losing days, most active tickers, the LLM's performance assessment, and any watchlist adjustment suggestions.
 
