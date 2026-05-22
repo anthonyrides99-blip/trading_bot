@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import config
 from utils.logger import logger
+from utils.clickup import create_task
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import GetOrdersRequest, GetPortfolioHistoryRequest
 from alpaca.trading.enums import QueryOrderStatus
@@ -98,6 +99,39 @@ def main() -> None:
     except Exception as exc:
         logger.warning(f"Positions error: {exc}")
 
+    # Build ClickUp task description from everything logged
+    trades_detail = "\n".join(
+        f"  {o.side.upper()} {float(o.filled_qty or 0):.0f}x {o.symbol} @ ${float(o.filled_avg_price or 0):.2f}"
+        for o in filled
+    ) or "No trades today."
+
+    try:
+        overnight = _trading_client.get_all_positions()
+        overnight_detail = "\n".join(
+            f"  {p.symbol}: {float(p.qty):.0f} shares, unrealized ${float(p.unrealized_pl or 0):+.2f}"
+            for p in overnight
+        ) or "None — flat."
+    except Exception:
+        overnight_detail = "Could not fetch."
+
+    sign = "+" if week_pnl >= 0 else ""  # reuse from above scope if available
+    try:
+        pnl_line = pnl_summary  # defined in portfolio history block above
+    except NameError:
+        pnl_line = "P&L unavailable"
+
+    create_task(
+        config.CLICKUP_API_TOKEN,
+        config.CLICKUP_LIST_DAILY,
+        name=f"Daily Summary — {today} | {pnl_line}",
+        description=(
+            f"Date: {today}\nMode: {'PAPER' if config.PAPER_TRADING else 'LIVE'}\n\n"
+            f"Account equity: ${equity:,.2f}\n"
+            f"{pnl_line}\n\n"
+            f"Trades ({len(filled)}):\n{trades_detail}\n\n"
+            f"Overnight positions:\n{overnight_detail}"
+        ),
+    )
     logger.info("Post-market summary complete")
 
 

@@ -5,3 +5,4 @@ pandas-ta>=0.3.14b
 APScheduler>=3.10.0
 python-dotenv>=1.0.0
 loguru>=0.7.0
+requests>=2.31.0

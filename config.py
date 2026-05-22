@@ -33,3 +33,10 @@ ALPACA_BASE_URL = (
     else "https://api.alpaca.markets"
 )
 ALPACA_DATA_URL = "https://data.alpaca.markets"
+
+# ClickUp integration (optional — tasks are silently skipped if not set)
+CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "")
+CLICKUP_LIST_TRADES: str = os.getenv("CLICKUP_LIST_TRADES", "")
+CLICKUP_LIST_DAILY: str = os.getenv("CLICKUP_LIST_DAILY", "")
+CLICKUP_LIST_WEEKLY: str = os.getenv("CLICKUP_LIST_WEEKLY", "")
+CLICKUP_LIST_PREMARKET: str = os.getenv("CLICKUP_LIST_PREMARKET", "")

@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import config
 from utils.logger import logger
+from utils.clickup import create_task
 from data import market_data, indicators
 from strategy import signals
 import anthropic
@@ -102,6 +103,22 @@ def main() -> None:
     logger.info(f"  STRONG BUY : {strong_buys or 'none'}")
     logger.info(f"  WATCH      : {watches or 'none'}")
     logger.info(f"  AVOID      : {avoids or 'none'}")
+
+    details = "\n".join(
+        f"[{r['score'].upper()}] {r['ticker']}: {r['reason']}" for r in results
+    )
+    create_task(
+        config.CLICKUP_API_TOKEN,
+        config.CLICKUP_LIST_PREMARKET,
+        name=f"Pre-Market Scan — {now.strftime('%Y-%m-%d')}",
+        description=(
+            f"Date: {now.strftime('%Y-%m-%d %H:%M ET')}\n\n"
+            f"STRONG BUY: {strong_buys or 'none'}\n"
+            f"WATCH: {watches or 'none'}\n"
+            f"AVOID: {avoids or 'none'}\n\n"
+            f"Ticker Details:\n{details}"
+        ),
+    )
     logger.info("Pre-market scan complete")
 
 

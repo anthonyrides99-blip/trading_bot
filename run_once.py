@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import config
 from utils.logger import logger
+from utils.clickup import create_task
 from data import market_data, indicators
 from strategy import signals, llm_analyst
 from execution import broker
@@ -124,12 +125,49 @@ def main() -> None:
                 logger.info(f"{ticker}: confidence {confidence:.2f} < 0.65 — hold")
                 continue
 
+            reason = decision.get("reason", "")
+            mode_tag = "PAPER" if config.PAPER_TRADING else "LIVE"
+            timestamp = datetime.now(ET).strftime("%Y-%m-%d %H:%M ET")
+
             if action == "buy" and not has_position:
                 qty = position_size(equity, price)
                 if qty > 0:
-                    broker.place_market_order(ticker, "buy", qty)
+                    success = broker.place_market_order(ticker, "buy", qty)
+                    if success:
+                        create_task(
+                            config.CLICKUP_API_TOKEN,
+                            config.CLICKUP_LIST_TRADES,
+                            name=f"BUY {qty}x {ticker} @ ${price:.2f} [{mode_tag}]",
+                            description=(
+                                f"Ticker: {ticker}\n"
+                                f"Side: BUY\n"
+                                f"Qty: {qty} shares\n"
+                                f"Price: ${price:.2f}\n"
+                                f"Confidence: {confidence:.0%}\n"
+                                f"Reason: {reason}\n\n"
+                                f"Technical Signals:\n{signal_summary}\n\n"
+                                f"Time: {timestamp}\nMode: {mode_tag}"
+                            ),
+                            priority=2,
+                        )
             elif action == "sell" and has_position:
-                broker.close_position(ticker)
+                success = broker.close_position(ticker)
+                if success:
+                    create_task(
+                        config.CLICKUP_API_TOKEN,
+                        config.CLICKUP_LIST_TRADES,
+                        name=f"SELL {ticker} (close position) [{mode_tag}]",
+                        description=(
+                            f"Ticker: {ticker}\n"
+                            f"Side: SELL (close)\n"
+                            f"Price: ${price:.2f}\n"
+                            f"Confidence: {confidence:.0%}\n"
+                            f"Reason: {reason}\n\n"
+                            f"Technical Signals:\n{signal_summary}\n\n"
+                            f"Time: {timestamp}\nMode: {mode_tag}"
+                        ),
+                        priority=2,
+                    )
             else:
                 logger.info(f"{ticker}: {action} — no action needed")
 

@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import config
 from utils.logger import logger
+from utils.clickup import create_task
 import anthropic
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import GetOrdersRequest, GetPortfolioHistoryRequest
@@ -120,6 +121,7 @@ Please provide:
 
 Be concise and actionable."""
 
+    review = ""
     try:
         response = _client.messages.create(
             model="claude-sonnet-4-6",
@@ -134,6 +136,21 @@ Be concise and actionable."""
     except Exception as exc:
         logger.error(f"LLM review failed: {exc}")
 
+    create_task(
+        config.CLICKUP_API_TOKEN,
+        config.CLICKUP_LIST_WEEKLY,
+        name=f"Weekly Review — {week_start} → {week_end}",
+        description=(
+            f"Period: {week_start} → {week_end}\n"
+            f"Mode: {'PAPER' if config.PAPER_TRADING else 'LIVE'}\n\n"
+            f"Equity: ${equity:,.2f}\n"
+            f"{pnl_summary}\n"
+            f"Total trades: {total_trades}\n"
+            f"Tickers: {tickers_traded}\n"
+            f"Most active: {most_active}\n\n"
+            f"--- Claude's Analysis ---\n{review or 'Analysis unavailable.'}"
+        ),
+    )
     logger.info("Weekly review complete")
 
 
