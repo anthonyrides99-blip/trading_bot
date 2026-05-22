@@ -32,14 +32,13 @@ def get_bars(ticker: str, timeframe: TimeFrame = TimeFrame.Minute, limit: int = 
     else:
         start = end - timedelta(days=7)
 
-    request = StockBarsRequest(
-        symbol_or_symbols=ticker,
-        timeframe=timeframe,
-        start=start,
-        end=end,
-        limit=limit,
-        feed=DataFeed.IEX,
-    )
+    # IEX feed only applies to intraday real-time data.
+    # Daily bars use Alpaca's historical provider which works on free accounts without a feed param.
+    kwargs = dict(symbol_or_symbols=ticker, timeframe=timeframe, start=start, end=end, limit=limit)
+    if timeframe != TimeFrame.Day:
+        kwargs["feed"] = DataFeed.IEX
+
+    request = StockBarsRequest(**kwargs)
     bars = _client.get_stock_bars(request)
     df = bars.df
 
