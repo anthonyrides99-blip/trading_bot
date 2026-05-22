@@ -67,7 +67,7 @@ def get_news_headlines(ticker: str, limit: int = 5) -> list[str]:
             limit=limit,
         )
         news = _news_client.get_news(request)
-        articles = getattr(news, "news", news)
+        articles = news.data.get("news", []) if hasattr(news, "data") else []
         return [a.headline for a in articles]
     except Exception as exc:
         logger.warning(f"{ticker}: failed to fetch news — {exc}")
