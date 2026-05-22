@@ -1,6 +1,6 @@
 ---
 name: "Trading Bot — Pre-Market Scan"
-routine_id: ""
+routine_id: "trig_01DWCtSrSSCDsvNykrsoMJ1x"
 cron: "0 13 * * 1-5"
 schedule_human: "9am ET Mon–Fri (before market open)"
 enabled: true

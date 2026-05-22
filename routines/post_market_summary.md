@@ -1,6 +1,6 @@
 ---
 name: "Trading Bot — Post-Market Summary"
-routine_id: ""
+routine_id: "trig_012ERzvaCtxCDLBR47vhtGsc"
 cron: "0 21 * * 1-5"
 schedule_human: "5pm ET Mon–Fri (after market close)"
 enabled: true

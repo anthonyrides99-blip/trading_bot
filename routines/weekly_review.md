@@ -1,6 +1,6 @@
 ---
 name: "Trading Bot — Weekly Performance Review"
-routine_id: ""
+routine_id: "trig_01TUeVkic1a2docVEpd9PH8F"
 cron: "0 22 * * 0"
 schedule_human: "6pm ET every Sunday"
 enabled: true
