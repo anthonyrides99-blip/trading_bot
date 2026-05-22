@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, StockNewsRequest
+from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
 from alpaca.data.timeframe import TimeFrame
 
 import config
@@ -11,11 +11,25 @@ from utils.logger import logger
 
 _client = StockHistoricalDataClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY)
 
+# News client — alpaca-py 0.43+ moved news to a separate client
+try:
+    from alpaca.data.historical.news import NewsClient
+    from alpaca.data.requests import NewsRequest
+    _news_client = NewsClient(config.ALPACA_API_KEY, config.ALPACA_SECRET_KEY)
+    _NEWS_AVAILABLE = True
+except ImportError:
+    _NEWS_AVAILABLE = False
+
 
 def get_bars(ticker: str, timeframe: TimeFrame = TimeFrame.Minute, limit: int = 100) -> pd.DataFrame:
     """Fetch OHLCV bars for a ticker. Returns a DataFrame indexed by timestamp."""
     end = datetime.now(timezone.utc)
-    start = end - timedelta(days=5)  # enough history for all indicators
+    # Use 90 calendar days for daily bars (covers ~60 trading days for indicators)
+    # Use 7 days for intraday bars (enough for 120 minute bars)
+    if timeframe == TimeFrame.Day:
+        start = end - timedelta(days=90)
+    else:
+        start = end - timedelta(days=7)
 
     request = StockBarsRequest(
         symbol_or_symbols=ticker,
@@ -44,17 +58,20 @@ def get_latest_price(ticker: str) -> float:
 
 def get_news_headlines(ticker: str, limit: int = 5) -> list[str]:
     """Return recent news headlines for a ticker."""
+    if not _NEWS_AVAILABLE:
+        return []
     try:
         end = datetime.now(timezone.utc)
         start = end - timedelta(days=2)
-        request = StockNewsRequest(
+        request = NewsRequest(
             symbols=[ticker],
             start=start,
             end=end,
             limit=limit,
         )
-        news = _client.get_stock_news(request)
-        return [article.headline for article in news]
+        news = _news_client.get_news(request)
+        articles = getattr(news, "news", news)
+        return [a.headline for a in articles]
     except Exception as exc:
         logger.warning(f"{ticker}: failed to fetch news — {exc}")
         return []

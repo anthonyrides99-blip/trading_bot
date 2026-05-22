@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import pandas as pd
-import pandas_ta as ta
+import ta
 
 from utils.logger import logger
 
@@ -31,30 +31,35 @@ def compute(ticker: str, df: pd.DataFrame) -> Indicators | None:
     close = df["close"]
     volume = df["volume"]
 
-    rsi_series = ta.rsi(close, length=14)
-    macd_df = ta.macd(close, fast=12, slow=26, signal=9)
-    ema20_series = ta.ema(close, length=20)
-    ema50_series = ta.ema(close, length=50)
-    bb_df = ta.bbands(close, length=20, std=2)
+    rsi_series = ta.momentum.RSIIndicator(close=close, window=14).rsi()
+
+    macd_ind = ta.trend.MACD(close=close, window_slow=26, window_fast=12, window_sign=9)
+    macd_series = macd_ind.macd()
+    macd_signal_series = macd_ind.macd_signal()
+    macd_hist_series = macd_ind.macd_diff()
+
+    ema20_series = ta.trend.EMAIndicator(close=close, window=20).ema_indicator()
+    ema50_series = ta.trend.EMAIndicator(close=close, window=50).ema_indicator()
+
+    bb = ta.volatility.BollingerBands(close=close, window=20, window_dev=2)
+    bb_upper_series = bb.bollinger_hband()
+    bb_mid_series = bb.bollinger_mavg()
+    bb_lower_series = bb.bollinger_lband()
 
     avg_vol = volume.rolling(20).mean().iloc[-1]
     vol_ratio = float(volume.iloc[-1] / avg_vol) if avg_vol else 1.0
 
-    macd_col = [c for c in macd_df.columns if c.startswith("MACD_") and "Signal" not in c and "Hist" not in c]
-    signal_col = [c for c in macd_df.columns if "MACDs" in c]
-    hist_col = [c for c in macd_df.columns if "MACDh" in c]
-
     ind = Indicators(
         ticker=ticker,
         rsi=_last(rsi_series),
-        macd=_last(macd_df[macd_col[0]]) if macd_col else 0.0,
-        macd_signal=_last(macd_df[signal_col[0]]) if signal_col else 0.0,
-        macd_hist=_last(macd_df[hist_col[0]]) if hist_col else 0.0,
+        macd=_last(macd_series),
+        macd_signal=_last(macd_signal_series),
+        macd_hist=_last(macd_hist_series),
         ema20=_last(ema20_series),
         ema50=_last(ema50_series),
-        bb_upper=_last(bb_df[[c for c in bb_df.columns if "BBU" in c][0]]),
-        bb_mid=_last(bb_df[[c for c in bb_df.columns if "BBM" in c][0]]),
-        bb_lower=_last(bb_df[[c for c in bb_df.columns if "BBL" in c][0]]),
+        bb_upper=_last(bb_upper_series),
+        bb_mid=_last(bb_mid_series),
+        bb_lower=_last(bb_lower_series),
         current_price=float(close.iloc[-1]),
         volume_ratio=round(vol_ratio, 2),
     )
