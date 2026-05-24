@@ -1,8 +1,8 @@
 ---
 name: "Trading Bot — Market Hours Tick"
 routine_id: "trig_01RC4WJ4Y5tFTPj1h1WevQpi"
-cron: "0 14-20 * * 1-5"
-schedule_human: "Hourly Mon–Fri 10am–4pm ET"
+cron: "0 14,17,20 * * 1-5"
+schedule_human: "3x daily Mon–Fri: 10am, 1pm, 4pm ET"
 enabled: true
 model: claude-opus-4-7
 repo: https://github.com/anthonyrides99-blip/trading_bot
