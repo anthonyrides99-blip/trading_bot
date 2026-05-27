@@ -1,0 +1,39 @@
+name: Trading Tick
+
+on:
+  schedule:
+    - cron: '0 14,15,16,17,18,19,20 * * 1-5'  # 10am–4pm ET hourly Mon–Fri
+  workflow_dispatch:                              # Manual trigger from GitHub UI
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - run: pip install -r requirements.txt -q
+
+      - name: Run trading tick
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAPER_TRADING: 'true'
+          WATCHLIST: 'AAPL,MSFT,NVDA,GOOGL,AMZN,META'
+          MAX_POSITION_PCT: '0.05'
+          MAX_DAILY_LOSS_PCT: '0.02'
+          TICK_INTERVAL_SECONDS: '300'
+          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          CLICKUP_LIST_TRADES: ${{ secrets.CLICKUP_LIST_TRADES }}
+          CLICKUP_LIST_DAILY: ${{ secrets.CLICKUP_LIST_DAILY }}
+          CLICKUP_LIST_WEEKLY: ${{ secrets.CLICKUP_LIST_WEEKLY }}
+          CLICKUP_LIST_PREMARKET: ${{ secrets.CLICKUP_LIST_PREMARKET }}
+        run: python run_once.py
