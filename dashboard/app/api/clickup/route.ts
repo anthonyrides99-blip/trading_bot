@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 async function fetchList(listId: string, token: string) {
   const res = await fetch(
-    `https://api.clickup.com/api/v2/list/${listId}/task?order_by=date_created&reverse=true&limit=10`,
+    `https://api.clickup.com/api/v2/list/${listId}/task?limit=10`,
     { headers: { Authorization: token }, cache: "no-store" }
   );
   if (!res.ok) {
