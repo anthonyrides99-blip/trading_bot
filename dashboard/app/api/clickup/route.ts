@@ -23,11 +23,15 @@ async function fetchList(listId: string, token: string) {
 export async function GET() {
   const token = process.env.CLICKUP_API_TOKEN!;
   const lists = [
-    process.env.CLICKUP_LIST_TRADES,
-    process.env.CLICKUP_LIST_DAILY,
-    process.env.CLICKUP_LIST_WEEKLY,
-    process.env.CLICKUP_LIST_PREMARKET,
-  ].filter(Boolean) as string[];
+    process.env.CLICKUP_LIST_TRADES    || "901416672058",
+    process.env.CLICKUP_LIST_DAILY     || "901416672079",
+    process.env.CLICKUP_LIST_WEEKLY    || "901416672081",
+    process.env.CLICKUP_LIST_PREMARKET || "901416672082",
+  ];
+
+  if (!token) {
+    return NextResponse.json({ error: "CLICKUP_API_TOKEN not set" }, { status: 500 });
+  }
 
   try {
     const results = await Promise.all(lists.map((id) => fetchList(id, token)));
