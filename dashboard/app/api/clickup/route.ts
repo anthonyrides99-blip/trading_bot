@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 async function fetchList(listId: string, token: string) {
   const res = await fetch(
     `https://api.clickup.com/api/v2/list/${listId}/task?limit=10`,
-    { headers: { Authorization: token }, cache: "no-store" }
+    { headers: { Authorization: token }, next: { revalidate: 300 } }
   );
   if (!res.ok) {
     const body = await res.text();
